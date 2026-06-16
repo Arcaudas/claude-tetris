@@ -1,0 +1,98 @@
+name: Claude Issue Triage
+
+on:
+  issues:
+    types: [opened, edited]
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Create labels if missing
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh label create "bug"           --color "d73a4a" --description "Algo roto o comportamiento incorrecto"  --force
+          gh label create "enhancement"   --color "a2eeef" --description "Nueva funcionalidad o mejora"           --force
+          gh label create "question"      --color "d876e3" --description "Necesita aclaración"                    --force
+          gh label create "ui"            --color "0075ca" --description "Visual, canvas, CSS"                    --force
+          gh label create "gameplay"      --color "e4e669" --description "Mecánicas, física, colisiones, rotación" --force
+          gh label create "performance"   --color "f9d0c4" --description "Velocidad, animación, requestAnimationFrame" --force
+          gh label create "documentation" --color "0052cc" --description "README, CLAUDE.md"                      --force
+          gh label create "invalid"       --color "e4e4e4" --description "No es un issue válido"                  --force
+
+      - name: Run Claude triage
+        uses: anthropics/claude-code-action@v1
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: '--allowed-tools Bash(gh issue edit *),Bash(gh issue comment *)'
+          prompt: |
+            Eres un asistente de triage para el repositorio de un juego Tetris en JavaScript puro (sin dependencias).
+            El repositorio tiene 3 archivos principales: index.html, style.css, game.js (~305 líneas).
+
+            Se ha creado o editado el siguiente issue:
+
+            **Número:** ${{ github.event.issue.number }}
+            **Título:** ${{ github.event.issue.title }}
+            **Cuerpo:**
+            ${{ github.event.issue.body }}
+
+            ## Tus tareas
+
+            ### 1. Asignar labels
+            Elige entre 1 y 3 labels de esta lista exacta (usa los nombres tal cual):
+            - `bug` — algo roto o comportamiento incorrecto
+            - `enhancement` — nueva funcionalidad o mejora
+            - `question` — necesita aclaración antes de poder trabajar
+            - `ui` — afecta canvas, CSS o elementos visuales
+            - `gameplay` — afecta mecánicas, física, colisiones, rotación de piezas
+            - `performance` — afecta velocidad, animación o requestAnimationFrame
+            - `documentation` — afecta README o CLAUDE.md
+            - `invalid` — no es un issue real o está duplicado
+
+            Ejecuta:
+            ```
+            gh issue edit ${{ github.event.issue.number }} --add-label "LABEL1,LABEL2" --repo ${{ github.repository }}
+            ```
+
+            ### 2. Publicar diagnóstico
+            Posta un comentario con este formato exacto usando `gh issue comment`:
+
+            ```
+            gh issue comment ${{ github.event.issue.number }} --repo ${{ github.repository }} --body "..."
+            ```
+
+            El comentario debe seguir esta estructura en español:
+
+            ---
+            ## 🔍 Diagnóstico automático
+
+            ### Resumen del problema
+            [2-3 frases explicando qué pide o reporta el issue]
+
+            ### Área afectada
+            [Función(es) o sección de `game.js` probablemente involucrada. Referencia las funciones del CLAUDE.md: `collide`, `rotateCW`, `tryRotate`, `ghostY`, `lockPiece`, `spawn`, `clearLines`, `draw`, `loop`, `init`, etc.]
+
+            ### Pasos sugeridos para implementar la solución
+            1. [Paso concreto]
+            2. [Paso concreto]
+            3. [...]
+
+            ### Preguntas pendientes
+            [Si el issue no es suficientemente claro, lista las preguntas. Si está claro, escribe "Ninguna."]
+
+            ---
+            *Diagnóstico generado automáticamente por Claude.*
+
+            Do not post a second diagnostic comment if one already exists from a previous run of this workflow — check existing comments first with `gh issue view ${{ github.event.issue.number }} --repo ${{ github.repository }} --comments` and only comment if no previous diagnostic exists.
