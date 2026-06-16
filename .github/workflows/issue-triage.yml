@@ -37,7 +37,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          claude_args: '--allowed-tools Bash(gh issue edit *),Bash(gh issue comment *)'
+          claude_args: '--allowed-tools Bash(gh *)'
           prompt: |
             Eres un asistente de triage para el repositorio de un juego Tetris en JavaScript puro (sin dependencias).
             El repositorio tiene 3 archivos principales: index.html, style.css, game.js (~305 líneas).
