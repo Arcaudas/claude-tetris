@@ -17,18 +17,22 @@ Usar cuando el usuario diga: "clima", "tiempo", "weather", "qué temperatura", "
 
 2. Ejecuta el comando apropiado:
 
-**Sin ubicación (default: Villalbilla):**
-```bash
-curl -s "wttr.in/Villalbilla,Madrid?format=j1"
-```
+  **Sin ubicación (default: Villalbilla):**
 
-**Con ubicación específica:**
-```bash
-curl -s "wttr.in/CIUDAD?format=j1"
-```
-Codifica espacios como `+` (ej: `Buenos+Aires`).
+  ```bash
+  curl -s "wttr.in/Villalbilla,Madrid?format=j1"
+  ```
+
+  **Con ubicación específica:**
+
+  ```bash
+  curl -s "wttr.in/CIUDAD?format=j1"
+  ```
+
+  Codifica espacios como `+` (ej: `Buenos+Aires`).
 
 3. Parsea el JSON con Python:
+
 ```bash
 curl -s "wttr.in/CIUDAD?format=j1" | python3 -c "
 import json, sys
