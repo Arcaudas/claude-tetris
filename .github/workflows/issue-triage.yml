@@ -68,6 +68,7 @@ jobs:
             ```
 
             ### 2. Publicar diagnóstico
+            El comentario debe estar escrito en formato Markdown que GitHub pueda renderizar correctamente (encabezados `#`, listas, bloques de código con triple backtick, énfasis, etc.).
             Posta un comentario con este formato exacto usando `gh issue comment`:
 
             ```
