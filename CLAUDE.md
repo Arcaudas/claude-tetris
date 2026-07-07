@@ -2,46 +2,42 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Ejecutar el juego
+## Running the game
 
-Sin build, sin dependencias. Abrir directamente o usar servidor estático:
+No build step or dependencies. Open directly or serve with any static server:
 
 ```bash
-python3 -m http.server 8000   # luego http://localhost:8000
+open index.html                  # macOS direct open
+python3 -m http.server 8000      # then visit http://localhost:8000
 ```
 
-## Arquitectura
+## Architecture
 
-Tres archivos cooperando, toda la lógica en `game.js` (~305 líneas, sin módulos):
+Three files, no framework, no bundler:
 
-- `index.html` — DOM: `<canvas id="board">` (300×600 px), `<canvas id="next-canvas">` (vista previa), panel HUD lateral, overlay pausa/game-over.
-- `style.css` — dark retro theme, flexbox layout, backdrop-filter en overlays.
-- `game.js` — lógica completa, estado global mutable.
+- **`index.html`** — DOM structure: `<canvas id="board">` (300×600px) for the playfield, `<canvas id="next-canvas">` (120×120px) for the preview, sidebar HUD (`#score`, `#lines`, `#level`), and a shared overlay `#overlay` for both PAUSE and GAME OVER states.
+- **`style.css`** — Dark/retro arcade theme; uses CSS variables, flexbox, and `backdrop-filter` on overlays.
+- **`game.js`** — All game logic (~305 lines, `'use strict'`, no modules).
 
-### Estado global en `game.js`
+### game.js internals
 
-Variables sueltas (no objeto): `board`, `current`, `next`, `score`, `lines`, `level`, `paused`, `gameOver`, `lastTime`, `dropAccum`, `dropInterval`, `animId`.
+| Concern | Key identifiers |
+|---|---|
+| Board state | `board` — `ROWS×COLS` matrix; `0` = empty, `1–7` = piece color index |
+| Piece representation | `{ type, shape, x, y }` where `shape` is a 2-D matrix |
+| Rotation | `rotateCW(shape)` — transpose + reverse; `tryRotate()` applies wall kicks `[0,±1,±2]` |
+| Collision | `collide(shape, ox, oy)` — checks bounds and board occupancy |
+| Game loop | `loop(ts)` via `requestAnimationFrame`; `dropAccum` tracks elapsed ms against `dropInterval` |
+| Line clear | `clearLines()` — iterates board bottom-up, splices full rows, prepends empty row |
+| Scoring | `LINE_SCORES = [0,100,300,500,800]` × `level`; hard drop +2/cell, soft drop +1/row |
+| Speed | `dropInterval = max(100, 1000 − (level−1) × 90)` ms; level = `floor(lines/10) + 1` |
+| Ghost piece | `ghostY()` — projects current piece down until collision; drawn at `globalAlpha = 0.2` |
+| State flags | `paused`, `gameOver`, `animId` (RAF handle) |
 
-### Flujo principal
+### Game flow
 
-```
-init() → spawn() → requestAnimationFrame(loop)
-loop(ts): acumula dt → baja pieza o lockPiece() → draw() → rAF(loop)
-lockPiece(): merge() → clearLines() → spawn()
-spawn(): si colisión al aparecer → endGame()
-```
+`init()` → `spawn()` → `requestAnimationFrame(loop)`. Each frame: accumulate dt → auto-drop or `lockPiece()` → `draw()`. `lockPiece()` = `merge()` + `clearLines()` + `spawn()`. If `spawn()` immediately collides → `endGame()`.
 
-### Puntos clave
+## Tunable constants (top of game.js)
 
-- `PIECES[type]` — matrices cuadradas indexadas 1–7; valor 0=vacío, 1–7=índice de color.
-- `collide(shape, ox, oy)` — comprueba límites y solapamiento con el tablero.
-- `rotateCW(shape)` — transposición + reverso de filas; devuelve nueva matriz.
-- `tryRotate()` — wall kicks: prueba offsets `[0, -1, 1, -2, 2]` antes de descartar.
-- `ghostY()` — proyecta la pieza hacia abajo; dibujada con `globalAlpha = 0.2`.
-- Velocidad: `max(100, 1000 − (level − 1) × 90)` ms; sube cada 10 líneas.
-- Puntuación hard drop: +2 pts/celda; soft drop: +1 pt/fila.
-
-### Parámetros tuneable (top de `game.js`)
-
-`COLS` (10), `ROWS` (20), `BLOCK` (30 px), `COLORS` (array 8 pos), `LINE_SCORES` ([0,100,300,500,800]).  
-Si cambias `COLS`/`ROWS`/`BLOCK`, ajustar también `width`/`height` del canvas en `index.html`.
+`COLS` (10), `ROWS` (20), `BLOCK` (30 px), `COLORS` (array indexed 1–7), `LINE_SCORES`. If you change `COLS`/`ROWS`/`BLOCK`, update the canvas `width`/`height` attributes in `index.html` to match (`COLS×BLOCK` and `ROWS×BLOCK`).
