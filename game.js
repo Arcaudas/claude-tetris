@@ -125,8 +125,10 @@ function clearLines() {
   if (cleared) {
     lines += cleared;
     score += (LINE_SCORES[cleared] || 0) * level;
-    level = Math.floor(lines / 10) + 1;
-    dropInterval = Math.max(100, 1000 - (level - 1) * 90);
+    // Se parte del nivel inicial elegido en el menú de pausa: si usáramos
+    // `Math.floor(lines / 10) + 1` el nivel bajaría de golpe al empezar en un nivel alto.
+    level = startLevel + Math.floor(lines / 10);
+    dropInterval = speedForLevel(level);
     updateHUD();
   }
 }
@@ -249,13 +251,13 @@ function togglePause() {
   if (gameOver) return;
   paused = !paused;
   if (!paused) {
+    hidePauseMenu();
+    // Sin reiniciar el reloj, el dt acumulado durante la pausa haría caer la pieza de golpe.
     lastTime = performance.now();
     loop(lastTime);
   } else {
     cancelAnimationFrame(animId);
-    overlayTitle.textContent = 'PAUSA';
-    overlayScore.textContent = '';
-    overlay.classList.remove('hidden');
+    showPauseMenu();
   }
 }
 
@@ -279,23 +281,25 @@ function init() {
   board = createBoard();
   score = 0;
   lines = 0;
-  level = 1;
+  level = startLevel;
   paused = false;
   gameOver = false;
-  dropInterval = 1000;
+  dropInterval = speedForLevel(level);
   dropAccum = 0;
   lastTime = performance.now();
   next = randomPiece();
   spawn();
   updateHUD();
   overlay.classList.add('hidden');
+  hidePauseMenu();
   cancelAnimationFrame(animId);
   animId = requestAnimationFrame(loop);
 }
 
 document.addEventListener('keydown', e => {
-  if (e.code === 'KeyP') { togglePause(); return; }
-  if (paused || gameOver) return;
+  if (e.code === 'KeyP' || e.code === 'Escape') { togglePause(); return; }
+  if (paused) { blockGameKey(e); return; }
+  if (gameOver) return;
   switch (e.code) {
     case 'ArrowLeft':
       if (!collide(current.shape, current.x - 1, current.y)) current.x--;
@@ -320,5 +324,97 @@ document.addEventListener('keydown', e => {
 
 restartBtn.addEventListener('click', init);
 
+/* ===== MENÚ DE PAUSA ===== */
+
+const START_LEVEL_STORAGE_KEY = 'tetris-start-level';
+const MIN_START_LEVEL = 1;
+const MAX_START_LEVEL = 15;
+
+const pauseMenu = document.getElementById('pause-menu');
+const resumeBtn = document.getElementById('resume-btn');
+const pauseRestartBtn = document.getElementById('pause-restart-btn');
+const toggleControlsBtn = document.getElementById('toggle-controls-btn');
+const pauseControls = document.getElementById('pause-controls');
+const startLevelSelect = document.getElementById('start-level-select');
+
+// Nivel con el que arranca cada partida; lo lee `init()`.
+let startLevel = MIN_START_LEVEL;
+
+function speedForLevel(levelValue) {
+  return Math.max(100, 1000 - (levelValue - 1) * 90);
+}
+
+function showPauseMenu() {
+  pauseMenu.classList.remove('hidden');
+}
+
+function hidePauseMenu() {
+  pauseMenu.classList.add('hidden');
+  pauseControls.classList.add('hidden');
+  toggleControlsBtn.textContent = 'Ver controles';
+  // Si un control del menú conserva el foco, las teclas del juego lo activarían
+  // (Space pulsaría el botón, las flechas cambiarían el selector).
+  if (document.activeElement) document.activeElement.blur();
+}
+
+// Evita que las teclas del juego hagan algo mientras el menú está abierto
+// (Space y flechas hacen scroll de la página por defecto).
+function blockGameKey(e) {
+  const gameKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Space', 'KeyX'];
+  if (gameKeys.includes(e.code)) e.preventDefault();
+}
+
+function toggleControlsPanel() {
+  const willBeVisible = pauseControls.classList.contains('hidden');
+  pauseControls.classList.toggle('hidden');
+  toggleControlsBtn.textContent = willBeVisible ? 'Ocultar controles' : 'Ver controles';
+}
+
+function readStoredStartLevel() {
+  try {
+    const stored = Number(localStorage.getItem(START_LEVEL_STORAGE_KEY));
+    if (stored >= MIN_START_LEVEL && stored <= MAX_START_LEVEL) return stored;
+  } catch (error) {
+    // localStorage puede fallar (modo privado); se usa el valor por defecto.
+  }
+  return MIN_START_LEVEL;
+}
+
+function saveStartLevel(levelValue) {
+  try {
+    localStorage.setItem(START_LEVEL_STORAGE_KEY, String(levelValue));
+  } catch (error) {
+    // Si no se puede persistir, el nivel sigue valiendo para esta sesión.
+  }
+}
+
+function fillStartLevelOptions() {
+  for (let value = MIN_START_LEVEL; value <= MAX_START_LEVEL; value++) {
+    const option = document.createElement('option');
+    option.value = String(value);
+    option.textContent = String(value);
+    startLevelSelect.appendChild(option);
+  }
+}
+
+function initStartLevel() {
+  fillStartLevelOptions();
+  startLevel = readStoredStartLevel();
+  startLevelSelect.value = String(startLevel);
+}
+
+startLevelSelect.addEventListener('change', () => {
+  startLevel = Number(startLevelSelect.value);
+  saveStartLevel(startLevel);
+  startLevelSelect.blur();
+});
+
+resumeBtn.addEventListener('click', togglePause);
+pauseRestartBtn.addEventListener('click', init);
+toggleControlsBtn.addEventListener('click', toggleControlsPanel);
+
+/* ===== FIN MENÚ DE PAUSA ===== */
+
 initTheme();
+initStartLevel();
 init();

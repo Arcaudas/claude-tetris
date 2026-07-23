@@ -59,6 +59,33 @@
         <button id="restart-btn">Reiniciar</button>
       </div>
     </div>
+
+    <!-- Menú de pausa: overlay independiente del de GAME OVER -->
+    <div id="pause-menu" class="overlay hidden">
+      <div class="pause-box">
+        <p class="pause-title">PAUSA</p>
+
+        <button id="resume-btn" class="pause-btn">Reanudar</button>
+        <button id="pause-restart-btn" class="pause-btn">Reiniciar</button>
+        <button id="toggle-controls-btn" class="pause-btn pause-btn-secondary">Ver controles</button>
+
+        <div id="pause-controls" class="pause-controls controls hidden">
+          <ul>
+            <li><kbd>←</kbd><kbd>→</kbd> mover</li>
+            <li><kbd>↑</kbd> rotar</li>
+            <li><kbd>↓</kbd> bajar</li>
+            <li><kbd>Space</kbd> caída</li>
+            <li><kbd>P</kbd> pausa</li>
+            <li><kbd>Esc</kbd> pausa</li>
+          </ul>
+        </div>
+
+        <div class="pause-level">
+          <label class="label" for="start-level-select">NIVEL INICIAL</label>
+          <select id="start-level-select"></select>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="game.js"></script>
