@@ -243,3 +243,39 @@ kbd {
 #restart-btn:hover {
   background: #9bbdff;
 }
+
+/* ---- Skins visuales ---- */
+
+#skin-select {
+  background: var(--kbd-bg);
+  color: var(--color-text);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* Cada skin puede redefinir el aspecto del canvas.
+   Va después de html[data-theme="light"] para ganar en caso de empate
+   de especificidad y aplicarse tanto en tema claro como oscuro. */
+html[data-skin="neon"] {
+  --bg-canvas: #05050a;
+  --grid-color: #1b1b3a;
+}
+
+html[data-skin="pastel"] {
+  --bg-canvas: #f7f5fb;
+  --grid-color: #e2dced;
+}
+
+html[data-skin="pixel"] {
+  --bg-canvas: #14141c;
+  --grid-color: #2b2b38;
+}
+
+html[data-theme="light"][data-skin="pixel"] {
+  --bg-canvas: #edeaf2;
+  --grid-color: #d2cede;
+}
