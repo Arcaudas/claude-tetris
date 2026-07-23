@@ -27,6 +27,11 @@
         </div>
 
         <div class="panel-section">
+          <span class="label">COMBO</span>
+          <span class="value" id="combo">0</span>
+        </div>
+
+        <div class="panel-section">
           <span class="label">NEXT</span>
           <canvas id="next-canvas" width="120" height="120"></canvas>
         </div>
@@ -56,7 +61,29 @@
       <div class="overlay-box">
         <p id="overlay-title">GAME OVER</p>
         <p id="overlay-score"></p>
+
+        <!-- Formulario de nombre: sólo visible si la puntuación entra en el top 5 -->
+        <div id="record-form" class="record-form hidden">
+          <label class="record-form-label" for="player-name">¡Nuevo record! Tu nombre:</label>
+          <div class="record-form-row">
+            <input type="text" id="player-name" maxlength="12" placeholder="ANÓNIMO" autocomplete="off" />
+            <button id="save-record-btn">Guardar</button>
+          </div>
+        </div>
+
+        <div id="gameover-records" class="records-panel"></div>
         <button id="restart-btn">Reiniciar</button>
+        <button id="reset-records-gameover" class="reset-records-btn">Resetear records</button>
+      </div>
+    </div>
+
+    <!-- Pantalla de inicio: visible al cargar, el juego no arranca hasta pulsar JUGAR -->
+    <div id="start-screen" class="overlay">
+      <div class="overlay-box">
+        <p id="start-title">TETRIS</p>
+        <div id="start-records" class="records-panel"></div>
+        <button id="play-btn">JUGAR</button>
+        <button id="reset-records-start" class="reset-records-btn">Resetear records</button>
       </div>
     </div>
   </div>
