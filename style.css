@@ -354,3 +354,174 @@ html[data-theme="light"][data-skin="pixel"] {
   font-family: inherit;
   cursor: pointer;
 }
+
+/* ---- Tabla de records y pantalla de inicio ---- */
+#start-title {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: 8px;
+  color: var(--color-title);
+}
+
+.overlay-box {
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.records-panel {
+  min-width: 260px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 10px 12px;
+  background: var(--bg-canvas);
+}
+
+.records-panel.hidden {
+  display: none;
+}
+
+.records-title {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--label-color);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.records-empty {
+  font-size: 12px;
+  color: var(--controls-color);
+  padding: 6px 0;
+}
+
+.records-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 13px;
+  color: var(--color-text);
+}
+
+.records-table th {
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: var(--label-color);
+  text-align: right;
+  padding: 2px 4px;
+  font-weight: 600;
+}
+
+.records-table th:nth-child(2),
+.records-table td.record-name {
+  text-align: left;
+}
+
+.records-table td {
+  text-align: right;
+  padding: 3px 4px;
+  border-top: 1px solid var(--border-color);
+}
+
+.records-table td.record-name {
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.records-table tr.record-highlight td {
+  color: var(--value-color);
+  font-weight: 700;
+  background: var(--kbd-bg);
+}
+
+.records-stats {
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--controls-color);
+}
+
+.record-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+
+.record-form.hidden {
+  display: none;
+}
+
+.record-form-label {
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--label-color);
+}
+
+.record-form-row {
+  display: flex;
+  gap: 6px;
+}
+
+#player-name {
+  width: 140px;
+  padding: 6px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--bg-canvas);
+  color: var(--color-text);
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 13px;
+}
+
+#save-record-btn,
+#play-btn {
+  background: #7aa2f7;
+  color: #0f0f17;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: background 0.15s;
+}
+
+#play-btn {
+  padding: 10px 34px;
+  font-size: 15px;
+}
+
+#save-record-btn:hover,
+#play-btn:hover {
+  background: #9bbdff;
+}
+
+#save-record-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.reset-records-btn {
+  background: transparent;
+  color: var(--controls-color);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 11px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.reset-records-btn:hover {
+  color: var(--overlay-title-color);
+  border-color: var(--overlay-title-color);
+}
+
+.reset-records-btn.hidden {
+  display: none;
+}
